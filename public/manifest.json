@@ -1,0 +1,16 @@
+{
+  "short_name": "MD Editor",
+  "name": "Vite React Markdown Editor",
+  "description": "A simple and powerful Markdown editor built with Vite and React.",
+  "icons": [
+    {
+      "src": "/react.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192 512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff"
+}

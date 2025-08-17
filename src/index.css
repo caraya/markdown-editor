@@ -1,0 +1,53 @@
+/* Import Open Props */
+@import 'open-props/style';
+
+/* Optional: Import normalize.css for browser consistency */
+@import 'open-props/normalize';
+
+/* Import a Prism.js theme */
+@import 'prismjs/themes/prism-okaidia.css';
+
+/* Basic body styles using Open Props variables */
+body {
+  font-family: var(--font-sans);
+  background-color: var(--gray-1);
+  color: var(--gray-8);
+  display: grid;
+  place-content: center;
+  min-height: 100vh;
+  margin: 0;
+}
+
+
+.prose-content {
+  max-width: 65ch; /* Sets a comfortable reading width */
+  margin-inline: auto; /* Centers the content */
+}
+
+.prose-content h1,
+.prose-content h2,
+.prose-content h3 {
+  font-family: var(--font-serif);
+  font-weight: var(--font-weight-7);
+  line-height: var(--font-lineheight-1);
+  margin-block-start: var(--size-8);
+  margin-block-end: var(--size-4);
+}
+
+.prose-content p {
+  line-height: var(--font-lineheight-4);
+  margin-block: var(--size-4);
+}
+
+.prose-content a {
+  color: var(--blue-6);
+  text-decoration: underline;
+}
+
+.prose-content pre:not([class^="lang-"]),
+.prose-content code:not([class^="lang-"]) {
+  inline-size: 100vw; 
+  padding: var(--size-1) var(--size-2);
+  border-radius: var(--radius-2);
+}
+
