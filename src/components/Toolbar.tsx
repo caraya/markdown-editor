@@ -5,7 +5,6 @@ interface ToolbarProps {
   onOpen: () => void;
   onSave: () => void;
   onSaveAs: () => void;
-  onExportToPdf: () => void;
   onExportToHtml: () => void;
   onExportToMarkdown: () => void;
   onTogglePreview: () => void;
@@ -31,7 +30,6 @@ const Toolbar: React.FC<ToolbarProps> = ({
   onOpen,
   onSave,
   onSaveAs,
-  onExportToPdf,
   onExportToHtml,
   onExportToMarkdown,
   onTogglePreview,
@@ -124,7 +122,6 @@ const Toolbar: React.FC<ToolbarProps> = ({
             <button style={menuButtonStyles} onClick={() => setExportMenuOpen(!exportMenuOpen)}>Export</button>
             {exportMenuOpen && (
               <div style={dropdownMenuStyles}>
-                <button style={menuItemStyles} onClick={() => { onExportToPdf(); setExportMenuOpen(false); }}>PDF</button>
                 <button style={menuItemStyles} onClick={() => { onExportToHtml(); setExportMenuOpen(false); }}>HTML</button>
                 <button style={menuItemStyles} onClick={() => { onExportToMarkdown(); setExportMenuOpen(false); }}>Markdown</button>
               </div>

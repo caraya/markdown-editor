@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 
 // import utilities
-import { exportToPdf, exportToHtml, exportToMarkdown} from './utils/exportUtils.ts';
+import { exportToHtml, exportToMarkdown} from './utils/exportUtils.ts';
 import { openFile, saveFile, saveFileAs } from './utils/fileSystem.ts';
 
 // import React components
@@ -89,7 +89,6 @@ const App: React.FC = () => {
               onOpen={handleOpen}
               onSave={handleSave}
               onSaveAs={handleSaveAs}
-              onExportToPdf={() => exportToPdf(previewRef.current)}
               onExportToHtml={() => exportToHtml(html)}
               onExportToMarkdown={() => exportToMarkdown(markdown)}
               onTogglePreview={() => setShowPreview(!showPreview)}

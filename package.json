@@ -1,7 +1,6 @@
 {
   "name": "markdown-editor",
-  "private": true,
-  "version": "0.0.0",
+  "version": "0.5.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,7 +9,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "jspdf": "^3.0.1",
     "markdown-it": "^14.1.0",
     "open-props": "^1.7.16",
     "prismjs": "^1.30.0",
@@ -19,6 +17,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
+    "@types/html-to-pdfmake": "^2.4.4",
     "@types/markdown-it": "^14.1.2",
     "@types/prismjs": "^1.26.5",
     "@types/react": "^19.1.10",
