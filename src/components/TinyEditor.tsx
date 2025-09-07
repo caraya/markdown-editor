@@ -6,7 +6,7 @@ interface EditorProps {
   onChange: (value: string) => void;
 }
 
-// Wrap the component in React.forwardRef
+// Wrap the component in React.forwardRef to accept a ref
 const Editor = forwardRef<HTMLTextAreaElement, EditorProps>(({ value, onChange }, ref) => {
   const styles: { [key: string]: CSSProperties } = {
     textarea: {
@@ -20,14 +20,14 @@ const Editor = forwardRef<HTMLTextAreaElement, EditorProps>(({ value, onChange }
       fontFamily: 'var(--font-mono)',
       resize: 'none',
       outline: 'none',
-      whiteSpace: 'pre-wrap',
-      overflowWrap: 'break-word',
+      overflowY: 'auto', // Add this for the inner scrollbar
+      boxSizing: 'border-box', // Ensure padding is included in the height
     },
   };
 
   return (
     <textarea
-      ref={ref} // Assign the forwarded ref to the textarea
+      ref={ref}
       style={styles.textarea}
       value={value}
       onChange={(e) => onChange(e.target.value)}
@@ -35,8 +35,5 @@ const Editor = forwardRef<HTMLTextAreaElement, EditorProps>(({ value, onChange }
     />
   );
 });
-
-// Add a display name for better debugging
-Editor.displayName = 'Editor';
 
 export default Editor;

@@ -10,22 +10,6 @@ interface ToolbarProps {
   onTogglePreview: () => void;
 }
 
-// A placeholder for the future style toolbar
-const StyleToolbar = () => {
-  const style: React.CSSProperties = {
-    padding: 'var(--size-2)',
-    backgroundColor: 'var(--gray-2)',
-    borderTop: '1px solid var(--gray-3)',
-    textAlign: 'center',
-    color: 'var(--gray-5)',
-  };
-  return (
-    <div style={style}>
-      <p style={{ margin: 0, fontSize: 'var(--font-size-0)' }}>Style Toolbar Placeholder</p>
-    </div>
-  );
-};
-
 const Toolbar: React.FC<ToolbarProps> = ({
   onOpen,
   onSave,
@@ -65,7 +49,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 'var(--size-2)',
+    padding: 'var(--size-2)'
   };
 
   const menuButtonStyles: React.CSSProperties = {
@@ -133,8 +117,6 @@ const Toolbar: React.FC<ToolbarProps> = ({
           Preview
         </button>
       </div>
-      {/* Child Toolbar for Styling */}
-      <StyleToolbar />
     </div>
   );
 };

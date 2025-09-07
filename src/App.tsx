@@ -1,29 +1,49 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, CSSProperties } from 'react';
+import { exportToHtml, exportToMarkdown } from './utils/exportUtils';
+import { openFile, saveFile, saveFileAs } from './utils/fileSystem';
+import Editor from './components/Editor';
+import Preview from './components/Preview';
+import Toolbar from './components/Toolbar';
+import StyleToolbar from './components/StyleToolbar';
+import md from './markdown-it.config';
 
-// import utilities
-import { exportToHtml, exportToMarkdown} from './utils/exportUtils.ts';
-import { openFile, saveFile, saveFileAs } from './utils/fileSystem.ts';
+// --- Type Definitions ---
+interface FileSystemFileHandle {
+  createWritable(): Promise<any>;
+  getFile(): Promise<File>;
+  kind: 'file';
+  name: string;
+  isSameEntry(other: FileSystemFileHandle): Promise<boolean>;
+}
 
-// import React components
-import Editor from './components/Editor.tsx';
-import Preview from './components/Preview.tsx';
-import Toolbar from './components/Toolbar.tsx';
+type StyleSheet = {
+  [key: string]: CSSProperties;
+};
 
-// import markdown-it config
-import md from './markdown-it.config.js';
-
-// Main App component
+// --- Main App Component ---
 const App: React.FC = () => {
   const [markdown, setMarkdown] = useState<string>('# Hello, Markdown!\n\nStart typing to see the magic happen.');
   const [html, setHtml] = useState<string>('');
   const [fileHandle, setFileHandle] = useState<FileSystemFileHandle | null>(null);
-  const [showPreview, setShowPreview] = useState<boolean>(true);
-  const previewRef = useRef<HTMLDivElement>(null);
+  const [showPreview, setShowPreview] = useState<boolean>(false); // Default to hidden
+  const previewRef = useRef<HTMLDivElement | null>(null);
+  const editorRef = useRef<HTMLTextAreaElement>(null);
+
+  // State for responsive layout
+  const [isDesktop, setIsDesktop] = useState(window.matchMedia('(min-width: 1024px)').matches);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(min-width: 1024px)');
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, []);
 
   useEffect(() => {
     setHtml(md.render(markdown));
   }, [markdown]);
 
+  // --- File Handlers ---
   const handleOpen = async () => {
     try {
       const { content, handle } = await openFile();
@@ -49,66 +69,128 @@ const App: React.FC = () => {
       const handle = await saveFileAs(markdown);
       setFileHandle(handle);
     } catch (error) {
-       if (error instanceof Error && error.name !== 'AbortError') {
+      if (error instanceof Error && error.name !== 'AbortError') {
         console.error('Failed to save file:', error);
       }
     }
   };
 
-  const appStyles: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100vh',
-    backgroundColor: 'var(--gray-1)',
-    color: 'var(--gray-8)',
-    fontFamily: 'var(--font-sans)',
+  // --- Style Application Logic ---
+  const applyStyle = (syntax: { prefix: string; suffix: string; placeholder: string }) => {
+    const textarea = editorRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = markdown.substring(start, end);
+
+    let newText;
+    if (selectedText) {
+      newText = `${syntax.prefix}${selectedText}${syntax.suffix}`;
+    } else {
+      newText = `${syntax.prefix}${syntax.placeholder}${syntax.suffix}`;
+    }
+
+    const updatedMarkdown = `${markdown.substring(0, start)}${newText}${markdown.substring(end)}`;
+    setMarkdown(updatedMarkdown);
+
+    setTimeout(() => {
+      textarea.focus();
+      if (selectedText) {
+        textarea.setSelectionRange(start + newText.length, start + newText.length);
+      } else {
+        textarea.setSelectionRange(start + syntax.prefix.length, start + syntax.prefix.length + syntax.placeholder.length);
+      }
+    }, 0);
   };
 
-  const mainStyles: React.CSSProperties = {
-    display: 'grid',
-    gridTemplateColumns: showPreview ? '1fr 1fr' : '1fr',
-    flexGrow: 1,
-    overflow: 'hidden', // This is crucial to contain the children
+  const handleStyleChange = (style: string) => {
+    const styles: { [key: string]: any } = {
+      bold: { prefix: '**', suffix: '**', placeholder: 'bold text' },
+      italic: { prefix: '*', suffix: '*', placeholder: 'italic text' },
+      heading: { prefix: '# ', suffix: '', placeholder: 'Heading' },
+      link: { prefix: '[', suffix: '](url)', placeholder: 'link text' },
+      code: { prefix: '`', suffix: '`', placeholder: 'code' },
+    };
+    applyStyle(styles[style]);
   };
 
-  const editorPaneStyles: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    borderRight: showPreview ? '1px solid var(--gray-3)' : 'none',
-    gridColumn: showPreview ? 'auto' : '1 / -1',
-    overflow: 'hidden', // Prevents this pane from overflowing its grid cell
+  // --- Dynamic Styles for Layout ---
+  const mainContentStyle: CSSProperties = {
+    ...styles.mainContent,
+    width: isDesktop ? '80vw' : '100%',
+    flexDirection: isDesktop ? 'row' : 'column',
   };
 
   return (
-    <div style={appStyles}>
-      <main style={mainStyles}>
-        {/* Editor Pane */}
-        <div style={editorPaneStyles}>
-          <header style={{ zIndex: 20, flexShrink: 0 }}>
-            <Toolbar
-              onOpen={handleOpen}
-              onSave={handleSave}
-              onSaveAs={handleSaveAs}
-              onExportToHtml={() => exportToHtml(html)}
-              onExportToMarkdown={() => exportToMarkdown(markdown)}
-              onTogglePreview={() => setShowPreview(!showPreview)}
-            />
-          </header>
-          <div style={{ flexGrow: 1, height: 0 }}>
-             <Editor value={markdown} onChange={setMarkdown} />
+    <div style={styles.appContainer}>
+      <main style={mainContentStyle}>
+        <div style={styles.editorPane}>
+          <Toolbar
+            onOpen={handleOpen}
+            onSave={handleSave}
+            onSaveAs={handleSaveAs}
+            onExportToHtml={() => exportToHtml(html)}
+            onExportToMarkdown={() => exportToMarkdown(markdown)}
+            onTogglePreview={() => setShowPreview(!showPreview)}
+          />
+          <StyleToolbar onStyleChange={handleStyleChange} />
+          <div style={styles.editorWrapper}>
+            <Editor ref={editorRef} value={markdown} onChange={setMarkdown} />
           </div>
         </div>
-        
-        {/* Preview Pane */}
+
         {showPreview && (
-          // This container also needs to prevent overflow
-          <div style={{ backgroundColor: 'var(--surface-1)', overflow: 'hidden' }}>
-              <Preview html={html} previewRef={previewRef} show={showPreview} onClose={() => setShowPreview(false)} />
+          <div style={styles.previewPane}>
+            <Preview html={html} previewRef={previewRef} />
           </div>
         )}
       </main>
     </div>
   );
+};
+
+// --- Styles using Open Props (Now with Flexbox) ---
+const styles: StyleSheet = {
+  appContainer: {
+    height: '100vh',
+    maxHeight: '100vh',
+    backgroundColor: 'var(--surface-1)',
+    color: 'var(--text-1)',
+    display: 'flex',
+    justifyContent: 'center',
+    paddingInline: 'var(--size-4)',
+    boxSizing: 'border-box',
+  },
+  mainContent: {
+    height: '100%',
+    maxWidth: '1600px',
+    display: 'flex',
+    gap: 'var(--size-4)',
+  },
+  editorPane: {
+    display: 'flex',
+    flexDirection: 'column',
+    border: 'var(--border-size-1) solid var(--surface-3)',
+    borderRadius: 'var(--radius-2)',
+    flex: '1 1 0',
+    minWidth: 0,
+    minHeight: 0,
+    overflowY: 'auto'
+  },
+  previewPane: {
+    display: 'flex',
+    flexDirection: 'column',
+    border: 'var(--border-size-1) solid var(--surface-3)',
+    borderRadius: 'var(--radius-2)',
+    flex: '1 1 0',
+    minWidth: 0,
+    minHeight: 0,
+  },
+  editorWrapper: {
+    flexGrow: 1,
+    position: 'relative',
+  },
 };
 
 export default App;

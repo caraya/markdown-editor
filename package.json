@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tinymce/tinymce-react": "^6.3.0",
     "markdown-it": "^14.1.0",
     "open-props": "^1.7.16",
     "prismjs": "^1.30.0",

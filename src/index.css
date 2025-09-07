@@ -51,3 +51,15 @@ body {
   border-radius: var(--radius-2);
 }
 
+.prose-content pre([class^="lang-"]),
+.prose-content code([class^="lang-"]) {
+  inline-size: 100%; 
+  padding: var(--size-1) var(--size-2);
+  border-radius: var(--radius-2);
+}
+
+.prose-content pre,
+.prose-content code {
+  white-space: pre-wrap !important;   /* Ensures code wraps */
+  word-break: break-all !important; /* Breaks long words or strings */
+}

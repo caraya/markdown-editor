@@ -1,70 +1,68 @@
-import React, { useEffect } from 'react';
-import Prism from 'prismjs';
+import React, { useEffect, CSSProperties } from 'react';
 
-// Define the props interface for type safety
+// Define the props interface for the component
 interface PreviewProps {
   html: string;
-  previewRef: React.Ref<HTMLDivElement>;
-  show: boolean;
-  onClose: () => void;
+  // Allow the ref to be null to match the type from the parent component
+  previewRef: React.RefObject<HTMLDivElement | null>;
 }
 
-const Preview: React.FC<PreviewProps> = ({ html, previewRef, show, onClose }) => {
-  // This effect runs whenever the `html` prop changes,
-  // ensuring that new code blocks are highlighted.
+// Augment the Window interface for the global Prism object
+declare global {
+  interface Window {
+    Prism: any;
+  }
+}
+
+const Preview: React.FC<PreviewProps> = ({ html, previewRef }) => {
   useEffect(() => {
-    Prism.highlightAll();
+    if (window.Prism) {
+      window.Prism.highlightAll();
+    }
   }, [html]);
 
-  const previewContainerStyles: React.CSSProperties = {
+  return (
+    <div style={styles.container}>
+      <div style={styles.header}>
+        <h2 style={styles.title}>Preview</h2>
+      </div>
+      <div
+        ref={previewRef}
+        className="prose-content"
+        style={styles.content}
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
+    </div>
+  );
+};
+
+// --- Styles using Open Props ---
+type StyleSheet = {
+  [key: string]: CSSProperties;
+};
+
+const styles: StyleSheet = {
+  container: {
     height: '100%',
-    backgroundColor: 'var(--surface-1)',
+    backgroundColor: 'var(--surface-2)',
     display: 'flex',
     flexDirection: 'column',
-  };
-
-  const headerStyles: React.CSSProperties = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  },
+  header: {
     padding: 'var(--size-3)',
-    borderBottom: '1px solid var(--gray-3)',
+    borderBottom: 'var(--border-size-1) solid var(--surface-3)',
     flexShrink: 0,
-  };
-
-  const titleStyles: React.CSSProperties = {
+  },
+  title: {
     fontSize: 'var(--font-size-4)',
     fontWeight: 'var(--font-weight-6)',
     margin: 0,
-  };
-
-  const contentContainerStyles: React.CSSProperties = {
+  },
+  content: {
+    padding: 'var(--size-fluid-4)',
     overflowY: 'auto',
     flexGrow: 1,
-    padding: 'var(--size-fluid-4)',
-  };
-
-  return (
-    <div style={previewContainerStyles}>
-        <div style={headerStyles}>
-            <h2 style={titleStyles}>Preview</h2>
-            <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  style={{ width: 'var(--size-5)', height: 'var(--size-5)' }} 
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  stroke="currentColor"
-                >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-        </div>
-        <div style={contentContainerStyles}>
-          <div ref={previewRef} className="prose-content" dangerouslySetInnerHTML={{ __html: html }} />
-        </div>
-    </div>
-  );
+  },
 };
 
 export default Preview;
